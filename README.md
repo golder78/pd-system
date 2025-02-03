@@ -113,7 +113,8 @@ Initial Push to GitHub
 git init
 git add .
 git commit -m "Initial commit"
-git remote add origin https://github.com/your-username/your-repo.git
+git remote add origin https://github.com/golder78/pd-system
+
 git push -u origin main
 
 Regular Workflow
