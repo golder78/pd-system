@@ -1,80 +1,94 @@
+import { useState, useEffect } from 'react';
+
 export function ManageCategoriesPage() {
-  const containerStyle = {
-    padding: '2.5rem',
-    backgroundColor: 'white',
-    borderRadius: '15px',
-    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.1)',
-    maxWidth: '500px',
-    margin: '3rem auto',
+  const [categories, setCategories] = useState([]);
+  const [categoryName, setCategoryName] = useState('');
+  const [editingId, setEditingId] = useState(null);
+
+  // Fetch categories on mount
+  useEffect(() => {
+    fetchCategories();
+  }, []);
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetch('/categories');
+      const data = await response.json();
+      setCategories(data);
+    } catch (error) {
+      console.error('Error fetching categories:', error);
+    }
   };
 
-  const headingStyle = {
-    fontSize: '2rem',
-    color: '#6B46C1',
-    fontWeight: 'bold',
-    marginBottom: '1.5rem',
-    textAlign: 'center',
+  const handleAddCategory = async (e) => {
+    e.preventDefault();
+    if (!categoryName.trim()) return;
+
+    const method = editingId ? 'PUT' : 'POST';
+    const url = editingId ? `/categories/${editingId}` : '/categories';
+
+    try {
+      const response = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ category_name: categoryName })
+      });
+      if (response.ok) {
+        setCategoryName('');
+        setEditingId(null);
+        fetchCategories(); // Refresh categories list
+      }
+    } catch (error) {
+      console.error('Error saving category:', error);
+    }
   };
 
-  const formLabelStyle = {
-    display: 'block',
-    marginBottom: '1rem',
+  const handleEdit = (category) => {
+    setCategoryName(category.category_name);
+    setEditingId(category.id);
   };
 
-  const inputStyle = {
-    width: '100%',
-    padding: '0.75rem',
-    border: '1px solid #D1D5DB',
-    borderRadius: '15px',
-    outline: 'none',
-    fontSize: '1rem',
-  };
-
-  const buttonStyle = {
-    backgroundColor: '#6B46C1',
-    color: 'white',
-    padding: '1rem',
-    width: '100%',
-    border: 'none',
-    borderRadius: '15px',
-    fontSize: '1rem',
-    cursor: 'pointer',
-    marginTop: '1.5rem',
-  };
-
-  const buttonHoverStyle = {
-    backgroundColor: '#553C9A',
-  };
-
-  const handleMouseOver = (e) => {
-    e.target.style.backgroundColor = buttonHoverStyle.backgroundColor;
-  };
-
-  const handleMouseOut = (e) => {
-    e.target.style.backgroundColor = buttonStyle.backgroundColor;
+  const handleDelete = async (id) => {
+    try {
+      const response = await fetch(`/categories/${id}`, { method: 'DELETE' });
+      if (response.ok) {
+        fetchCategories();
+      }
+    } catch (error) {
+      console.error('Error deleting category:', error);
+    }
   };
 
   return (
-    <div style={containerStyle}>
-      <h1 style={headingStyle}>Manage Categories</h1>
-      <form>
-        <label style={formLabelStyle}>
-          <span style={{ fontSize: '1.125rem', fontWeight: '500', color: '#4A5568' }}>Category Name:</span>
-          <input
-            type="text"
-            placeholder="Enter category name"
-            style={inputStyle}
+    <div className="p-10 bg-white shadow-xl rounded-xl max-w-md mx-auto">
+      <h1 className="text-3xl text-purple-700 font-bold mb-6 text-center">Manage Categories</h1>
+      <form onSubmit={handleAddCategory}>
+        <label className="block mb-4">
+          <span className="text-lg font-medium text-gray-700">Category Name:</span>
+          <input 
+            type="text" 
+            value={categoryName} 
+            onChange={(e) => setCategoryName(e.target.value)}
+            placeholder="Enter category name" 
+            className="w-full p-2 border border-gray-300 rounded-xl focus:outline-purple-500" 
           />
         </label>
-        <button
-          type="submit"
-          style={buttonStyle}
-          onMouseOver={handleMouseOver}
-          onMouseOut={handleMouseOut}
-        >
-          Add Category
+        <button type="submit" className="w-full bg-purple-600 text-white p-3 rounded-2xl hover:bg-purple-700">
+          {editingId ? 'Update Category' : 'Add Category'}
         </button>
       </form>
+      
+      <ul className="mt-6">
+        {categories.map(category => (
+          <li key={category.id} className="flex justify-between items-center p-3 border-b">
+            <span>{category.category_name}</span>
+            <div>
+              <button className="text-blue-500 mr-2" onClick={() => handleEdit(category)}>Edit</button>
+              <button className="text-red-500" onClick={() => handleDelete(category.id)}>Delete</button>
+            </div>
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
