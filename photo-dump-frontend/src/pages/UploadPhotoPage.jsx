@@ -1,102 +1,40 @@
-export function UploadPhotoPage() {
-  const containerStyle = {
-    padding: '2rem',
-    backgroundColor: '#ffffff',
-    borderRadius: '20px',
-    boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1)',
-    maxWidth: '600px',
-    margin: 'auto',
-    background: 'linear-gradient(135deg, #f3e5f5, #e1bee7)',
-  };
+import { useState, useEffect } from 'react';
 
-  const titleStyle = {
-    fontSize: '2.5rem',
-    color: '#6a1b9a',
-    fontWeight: 'bold',
-    marginBottom: '1.5rem',
-    textAlign: 'center',
-  };
+export function ViewPhotosPage() {
+  const [photos, setPhotos] = useState([]);
+  const [hoveredPhoto, setHoveredPhoto] = useState(null);
 
-  const labelStyle = {
-    fontSize: '1rem',
-    fontWeight: '500',
-    color: '#555',
-    marginBottom: '0.5rem',
-  };
-
-  const inputStyle = {
-    width: '100%',
-    padding: '1rem',
-    border: '1px solid #ddd',
-    borderRadius: '10px',
-    backgroundColor: '#f9f9f9',
-    marginBottom: '1.5rem',
-    fontSize: '1rem',
-    color: '#333',
-  };
-
-  const buttonStyle = {
-    width: '100%',
-    backgroundColor: '#8e24aa',
-    color: '#fff',
-    padding: '1.2rem',
-    borderRadius: '20px',
-    fontSize: '1.2rem',
-    fontWeight: 'bold',
-    cursor: 'pointer',
-    transition: 'background-color 0.3s ease',
-  };
-
-  const buttonHoverStyle = {
-    backgroundColor: '#7b1fa2',
-  };
+  useEffect(() => {
+    fetch('/api/photos')
+      .then(response => response.json())
+      .then(data => setPhotos(data))
+      .catch(error => console.error("Error fetching photos:", error));
+  }, []);
 
   return (
-    <div style={containerStyle}>
-      <h1 style={titleStyle}>Upload a New Photo</h1>
-      <form>
-        <div>
-          <label style={labelStyle} htmlFor="description">Photo Description:</label>
-          <input 
-            type="text" 
-            id="description"
-            placeholder="Enter a description" 
-            style={inputStyle}
-          />
-        </div>
-
-        <div>
-          <label style={labelStyle} htmlFor="category">Category:</label>
-          <select 
-            id="category"
-            style={inputStyle}
+    <div className="p-8 max-w-6xl mx-auto bg-gradient-to-br from-purple-200 to-purple-500 rounded-2xl shadow-2xl">
+      <h1 className="text-4xl font-bold text-purple-700 text-center uppercase mb-6">View All Photos</h1>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {photos.map((photo) => (
+          <div
+            key={photo.id}
+            className={`p-6 bg-gradient-to-r from-pink-200 to-purple-300 rounded-xl shadow-lg transform transition-transform duration-300 ${
+              hoveredPhoto === photo.id ? 'scale-105 shadow-2xl' : ''
+            }`}
+            onMouseEnter={() => setHoveredPhoto(photo.id)}
+            onMouseLeave={() => setHoveredPhoto(null)}
           >
-            <option>Choose a category...</option>
-            <option>Nature</option>
-            <option>Travel</option>
-            <option>Food</option>
-            <option>Animals</option>
-          </select>
-        </div>
-
-        <div>
-          <label style={labelStyle} htmlFor="file">Upload Photo:</label>
-          <input 
-            type="file" 
-            id="file" 
-            style={inputStyle}
-          />
-        </div>
-
-        <button
-          type="submit"
-          style={buttonStyle}
-          onMouseEnter={(e) => (e.target.style.backgroundColor = buttonHoverStyle.backgroundColor)}
-          onMouseLeave={(e) => (e.target.style.backgroundColor = buttonStyle.backgroundColor)}
-        >
-          Upload Photo
-        </button>
-      </form>
+            <img
+              src={photo.file_path}
+              alt={photo.description}
+              className="w-full h-48 object-cover rounded-lg transition-transform duration-300 hover:scale-105"
+            />
+            <p className="text-xl font-semibold text-purple-800 mt-3">{photo.description}</p>
+            <p className="text-sm text-gray-600 mt-1">Category: {photo.category || 'Uncategorized'}</p>
+            <p className="text-sm text-gray-600">Uploaded by: {photo.user}</p>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
