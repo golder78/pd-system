@@ -8,7 +8,7 @@ class User(db.Model):
     name = db.Column(db.String(80), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     photos = db.relationship('Photo', backref='user', lazy=True)
-    password=db.Column(db.String(40),unique=True, nullable=False)
+    password=db.Column(db.String(40), nullable=False)
 # Photo Model
 class Photo(db.Model):
     photo_id = db.Column(db.Integer, primary_key=True)

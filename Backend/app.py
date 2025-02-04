@@ -6,10 +6,16 @@ from routes.photos import photos_blueprint
 from routes.categories import categories_blueprint
 from routes.tags import tags_blueprint
 from routes.users import users_blueprint
-from flask_cors import CORS  # Enable CORS for handling cross-origin requests
+from flask_cors import CORS
+import os  # Enable CORS for handling cross-origin requests
 
 app = Flask(__name__)
 app.config.from_object(Config)
+
+UPLOAD_FOLDER = 'uploads'
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)  # Create folder if not exists
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+
 
 # Enable CORS for handling cross-origin requests between frontend and backend
 CORS(app)
